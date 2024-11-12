@@ -1,0 +1,219 @@
+{
+	"name": "19 logUsingSP_level1",
+	"properties": {
+		"activities": [
+			{
+				"name": "Set variable1",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "temp",
+					"value": {
+						"value": "@int(10)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Stored procedure1",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Set variable1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[log].[CaptureADFPipelineLogs]",
+					"storedProcedureParameters": {
+						"p_adfName": {
+							"value": {
+								"value": "@pipeline().DataFactory",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_errorMessage": {
+							"value": null,
+							"type": "String"
+						},
+						"p_pipelineName": {
+							"value": {
+								"value": "@pipeline().Pipeline",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_runEnd": {
+							"value": {
+								"value": "@utcNow()",
+								"type": "Expression"
+							},
+							"type": "Datetime"
+						},
+						"p_runID": {
+							"value": {
+								"value": "@pipeline().RunId",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_runStart": {
+							"value": {
+								"value": "@utcNow()",
+								"type": "Expression"
+							},
+							"type": "Datetime"
+						},
+						"p_status": {
+							"value": {
+								"value": "@variables('Success_Status')",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "Ls_ForStoredProcedure",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Stored procedure1_copy1",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Lookup1",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[log].[CaptureADFPipelineLogs]",
+					"storedProcedureParameters": {
+						"p_adfName": {
+							"value": {
+								"value": "@pipeline().DataFactory",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_errorMessage": {
+							"value": {
+								"value": "@activity('Lookup1').error.message",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_pipelineName": {
+							"value": {
+								"value": "@pipeline().Pipeline",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_runEnd": {
+							"value": {
+								"value": "@utcNow()",
+								"type": "Expression"
+							},
+							"type": "Datetime"
+						},
+						"p_runID": {
+							"value": {
+								"value": "@pipeline().RunId",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_runStart": {
+							"value": {
+								"value": "@utcNow()",
+								"type": "Expression"
+							},
+							"type": "Datetime"
+						},
+						"p_status": {
+							"value": {
+								"value": "@variables('Failed_Status')",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "Ls_ForStoredProcedure",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Lookup1",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "select * from dummy",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "ds_forlookupserver",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			}
+		],
+		"variables": {
+			"temp": {
+				"type": "String"
+			},
+			"Success_Status": {
+				"type": "String",
+				"defaultValue": "Success"
+			},
+			"Failed_Status": {
+				"type": "String",
+				"defaultValue": "Fail"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-11-01T06:48:05Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

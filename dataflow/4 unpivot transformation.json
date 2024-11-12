@@ -1,0 +1,67 @@
+{
+	"name": "4 unpivot transformation",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_blobPivot",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_blop_unpivot",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "unpivot1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          deptno as string,",
+				"          ANALYST as string,",
+				"          CLERK as string,",
+				"          MANAGER as string,",
+				"          PRESIDENT as string,",
+				"          SALESMAN as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> source1",
+				"source1 unpivot(output(",
+				"          job as string,",
+				"          count as string",
+				"     ),",
+				"     ungroupBy(deptno),",
+				"     lateral: true,",
+				"     ignoreNullPivots: true) ~> unpivot1",
+				"unpivot1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          empno as string,",
+				"          ename as string,",
+				"          job as string,",
+				"          mgr as string,",
+				"          hiredate as string,",
+				"          sal as string,",
+				"          comm as string,",
+				"          deptno as string",
+				"     ),",
+				"     partitionFileNames:['unpivotdataemp.csv'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> sink1"
+			]
+		}
+	}
+}

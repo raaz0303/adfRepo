@@ -1,0 +1,176 @@
+{
+	"name": "20 pl2",
+	"properties": {
+		"activities": [
+			{
+				"name": "Wait1",
+				"type": "Wait",
+				"dependsOn": [
+					{
+						"activity": "start log",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"waitTimeInSeconds": 20
+				}
+			},
+			{
+				"name": "calling p3",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Wait1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "20 pl3",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"parentID": {
+							"value": "@activity('start log').output.firstRow.ID",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "start log",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderStoredProcedureName": "[log].[ADFPipelinelogstartHierarchy]",
+						"storedProcedureParameters": {
+							"p_adfName": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().DataFactory",
+									"type": "Expression"
+								}
+							},
+							"p_parentID": {
+								"type": "Int32",
+								"value": {
+									"value": "@pipeline().parameters.parentID",
+									"type": "Expression"
+								}
+							},
+							"p_pipelineName": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().Pipeline",
+									"type": "Expression"
+								}
+							},
+							"p_runID": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().RunId",
+									"type": "Expression"
+								}
+							},
+							"p_runStart": {
+								"type": "Datetime",
+								"value": null
+							}
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "ds_forlookupserver",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "end log",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "calling p3",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[log].[ADFPipelinelogsendhierarchy]",
+					"storedProcedureParameters": {
+						"p_errorMessage": {
+							"value": null,
+							"type": "String"
+						},
+						"p_id": {
+							"value": {
+								"value": "@activity('start log').output.firstRow.ID",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_runEnd": {
+							"value": null,
+							"type": "Datetime"
+						},
+						"p_status": {
+							"value": {
+								"value": "@variables('SucessStatus')",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "Ls_ForStoredProcedure",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"parentID": {
+				"type": "int"
+			}
+		},
+		"variables": {
+			"SucessStatus": {
+				"type": "String",
+				"defaultValue": "Suucess"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-11-01T12:52:42Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

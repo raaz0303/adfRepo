@@ -1,0 +1,193 @@
+{
+	"name": "19 log_of_area_pipeline",
+	"properties": {
+		"activities": [
+			{
+				"name": "Set length value",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Lookup1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "length",
+					"value": 10
+				}
+			},
+			{
+				"name": "Set breadth value",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Lookup1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "breadth",
+					"value": 5
+				}
+			},
+			{
+				"name": "calculate area",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set length value",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set breadth value",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "area",
+					"value": {
+						"value": "@mul(variables('length'),variables('breadth'))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Lookup1",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderStoredProcedureName": "[log].[ADFPipelinelogstart]",
+						"storedProcedureParameters": {
+							"p_adfName": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().DataFactory",
+									"type": "Expression"
+								}
+							},
+							"p_pipelineName": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().Pipeline",
+									"type": "Expression"
+								}
+							},
+							"p_runID": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().RunId",
+									"type": "Expression"
+								}
+							},
+							"p_runStart": {
+								"type": "Datetime",
+								"value": null
+							}
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "ds_forlookupserver",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Stored procedure1",
+				"type": "SqlServerStoredProcedure",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
+				"dependsOn": [
+					{
+						"activity": "calculate area",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[log].[ADFPipelinelogstart]",
+					"storedProcedureParameters": {
+						"p_adfName": {
+							"value": "",
+							"type": "String"
+						},
+						"p_pipelineName": {
+							"value": "",
+							"type": "String"
+						},
+						"p_runID": {
+							"value": "",
+							"type": "String"
+						},
+						"p_runStart": {
+							"value": "",
+							"type": "DateTime"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "Ls_ForStoredProcedure",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"variables": {
+			"length": {
+				"type": "Integer"
+			},
+			"breadth": {
+				"type": "Integer"
+			},
+			"area": {
+				"type": "Integer"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-11-01T06:48:05Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

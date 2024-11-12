@@ -1,0 +1,36 @@
+{
+	"name": "ds_blob_data_load_from_db_to_blob_staging",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_forblob",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Schema": {
+				"type": "string"
+			},
+			"Filename": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@concat(dataset().Schema,'_',dataset().Filename,'.parquet')",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@concat('/',substring(utcNow(),0,4),'/',substring(utcNow(),5,2),'/',substring(utcNow(),8,2),'/')",
+					"type": "Expression"
+				},
+				"container": "data"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

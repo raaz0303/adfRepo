@@ -1,0 +1,110 @@
+{
+	"name": "16 copy file from Db to Db",
+	"properties": {
+		"activities": [
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('tablelist')",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Copy data1",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "@concat('SELECT ',item().SrcColumns,' FROM ',item().SrcSchema,'.',item().SrcTableName)",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "SqlServerSink",
+									"preCopyScript": {
+										"value": "@concat('TRUNCATE TABLE ',item().DestSchema,'.',item().DestTablename)",
+										"type": "Expression"
+									},
+									"writeBehavior": "insert",
+									"sqlWriterUseTableLock": false,
+									"tableOption": "autoCreate"
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "ds_forDbtoDbSql_source",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "ds_forDbtoDbSql_sink",
+									"type": "DatasetReference",
+									"parameters": {
+										"schema": {
+											"value": "@item().DestSchema",
+											"type": "Expression"
+										},
+										"tablename": {
+											"value": "@item().DestTablename",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"variables": {
+			"tablelist": {
+				"type": "Array",
+				"defaultValue": [
+					{
+						"SrcSchema": "SalesLt",
+						"SrcTableName": "Address",
+						"SrcColumns": "[AddressID],[AddressLine1],[AddressLine2],[City],[StateProvince],[CountryRegion],[PostalCode],[rowguid],[ModifiedDate]",
+						"DestSchema": "stg",
+						"DestTablename": "Address"
+					},
+					{
+						"SrcSchema": "SalesLt",
+						"SrcTableName": "Customer",
+						"SrcColumns": "[CustomerID],[NameStyle],[Title],[FirstName],[MiddleName] ,[LastName] ,[Suffix],[CompanyName],[SalesPerson]",
+						"DestSchema": "stg",
+						"DestTablename": "Customer"
+					}
+				]
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-10-31T05:47:01Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

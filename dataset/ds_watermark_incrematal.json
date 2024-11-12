@@ -1,0 +1,13 @@
+{
+	"name": "ds_watermark_incrematal",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_SqlServer",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

@@ -1,0 +1,339 @@
+{
+	"name": "2 Incremental from onprem to datalake",
+	"properties": {
+		"activities": [
+			{
+				"name": "Full load",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('FullLoadTableList')",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Full Load from onprem to adls",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "ds_Onprem_SqlServer",
+									"type": "DatasetReference",
+									"parameters": {
+										"schema": {
+											"value": "@item().schema",
+											"type": "Expression"
+										},
+										"tablename": {
+											"value": "@item().tablename",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "ds_Adls_Rawdata",
+									"type": "DatasetReference",
+									"parameters": {
+										"filename": {
+											"value": "@item().filename",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"name": "Incremental Load",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('IncrementalLoadTableList')",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Watermark Date",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "@concat('select watermarkDateTime from [dbo].[Watermarktable]\nwhere tablename=''',item().tablename,'''')",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "Ds_forLookupIntoWatermarkTable",
+									"type": "DatasetReference"
+								},
+								"firstRowOnly": true
+							}
+						},
+						{
+							"name": "Onprem max dateTime",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "@concat('select max(modifiedDate) as maxdate from ',item().tablename)",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "Ds_OnpremLookup",
+									"type": "DatasetReference"
+								}
+							}
+						},
+						{
+							"name": "Incremetal Load from onprem to adls",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Watermark Date",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "Onprem max dateTime",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "@concat('select * from ',item().tablename,' where modifieddate > ''',activity('Watermark Date').output.firstRow.watermarkdatetime,''' and modifieddate <= ''',activity('Onprem max dateTime').output.firstRow.maxdate,'''')",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "Ds_OnpremLookup",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "ds_Adls_Rawdata",
+									"type": "DatasetReference",
+									"parameters": {
+										"filename": {
+											"value": "@item().filename",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "update watermark",
+							"type": "Script",
+							"dependsOn": [
+								{
+									"activity": "Incremetal Load from onprem to adls",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "ls_SqlServer",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@concat('update watermarktable set watermarkDateTime=''',activity('Onprem max dateTime').output.firstRow.maxdate,''' where tablename=''',item().tablename,'''')",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						}
+					]
+				}
+			}
+		],
+		"variables": {
+			"FullLoadTableList": {
+				"type": "Array",
+				"defaultValue": [
+					{
+						"schema": "dbo",
+						"tablename": "Customers",
+						"filename": "Customers"
+					},
+					{
+						"schema": "dbo",
+						"tablename": "Products",
+						"filename": "Products"
+					},
+					{
+						"schema": "dbo",
+						"tablename": "Promotions",
+						"filename": "Promotions"
+					},
+					{
+						"schema": "dbo",
+						"tablename": "Reviews",
+						"filename": "Reviews"
+					},
+					{
+						"schema": "dbo",
+						"tablename": "ShippingDetails",
+						"filename": "ShippingDetails"
+					},
+					{
+						"schema": "dbo",
+						"tablename": "Returns",
+						"filename": "Returns"
+					}
+				]
+			},
+			"IncrementalLoadTableList": {
+				"type": "Array",
+				"defaultValue": [
+					{
+						"schema": "dbo",
+						"tablename": "Orders",
+						"filename": "Orders"
+					},
+					{
+						"schema": "dbo",
+						"tablename": "OrderItems",
+						"filename": "OrderItems"
+					},
+					{
+						"schema": "dbo",
+						"tablename": "Inventory",
+						"filename": "Inventory"
+					},
+					{
+						"schema": "dbo",
+						"tablename": "Payments",
+						"filename": "Payments"
+					}
+				]
+			}
+		},
+		"folder": {
+			"name": "project"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-11-09T10:00:00Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

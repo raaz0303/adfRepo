@@ -1,0 +1,55 @@
+{
+	"name": "ds_Incremental_Sink",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_forsqldb",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "SaleID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "ProductID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Quantity",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Price",
+				"type": "decimal",
+				"precision": 10,
+				"scale": 2
+			},
+			{
+				"name": "CustomerName",
+				"type": "varchar"
+			},
+			{
+				"name": "CreatedDate",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "ModifiedDate",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			}
+		],
+		"typeProperties": {
+			"schema": "stg",
+			"table": "Sales"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

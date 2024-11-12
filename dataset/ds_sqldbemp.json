@@ -1,0 +1,55 @@
+{
+	"name": "ds_sqldbemp",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_forsqldb",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "empno",
+				"type": "smallint",
+				"precision": 5
+			},
+			{
+				"name": "ename",
+				"type": "nvarchar"
+			},
+			{
+				"name": "job",
+				"type": "nvarchar"
+			},
+			{
+				"name": "mgr",
+				"type": "smallint",
+				"precision": 5
+			},
+			{
+				"name": "hiredate",
+				"type": "date"
+			},
+			{
+				"name": "sal",
+				"type": "smallint",
+				"precision": 5
+			},
+			{
+				"name": "comm",
+				"type": "smallint",
+				"precision": 5
+			},
+			{
+				"name": "deptno",
+				"type": "tinyint",
+				"precision": 3
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "emp"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

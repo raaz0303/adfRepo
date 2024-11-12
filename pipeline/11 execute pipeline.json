@@ -1,0 +1,30 @@
+{
+	"name": "11 execute pipeline",
+	"properties": {
+		"activities": [
+			{
+				"name": "Execute Pipeline1",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "11 parameter in pipeline level",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"schema": "saleslt",
+						"tablename": "address"
+					}
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2024-10-28T08:57:37Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

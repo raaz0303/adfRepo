@@ -1,0 +1,22 @@
+{
+	"name": "ds_hydration",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_forblob",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Excel",
+		"typeProperties": {
+			"sheetName": "Sheet1",
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "Hydration File1.xlsx",
+				"container": "hydration"
+			},
+			"firstRowAsHeader": true
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

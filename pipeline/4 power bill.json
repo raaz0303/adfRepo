@@ -1,0 +1,73 @@
+{
+	"name": "4 power bill",
+	"properties": {
+		"activities": [
+			{
+				"name": "If Condition1",
+				"type": "IfCondition",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@lessOrEquals(pipeline().parameters.units,200)",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Set variable2",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "price",
+								"value": {
+									"value": "@add(mul(sub(pipeline().parameters.units,200),5),mul(200,3))",
+									"type": "Expression"
+								}
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "Set variable1",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "price",
+								"value": {
+									"value": "@mul(pipeline().parameters.units,3)",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"units": {
+				"type": "int"
+			}
+		},
+		"variables": {
+			"price": {
+				"type": "Integer"
+			}
+		},
+		"folder": {
+			"name": "Practice"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-10-29T09:51:49Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,37 @@
+{
+	"name": "1 data flow simple copy file to file",
+	"properties": {
+		"activities": [
+			{
+				"name": "Data flow1",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "1 simple copy file from blob to blob",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"folder": {
+			"name": "Data Flows"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-11-11T07:17:37Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,161 @@
+{
+	"name": "32 Incremental Load onprem to stg",
+	"properties": {
+		"activities": [
+			{
+				"name": "Fetch Watemark Date",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "select Lastupdate from cloud.Watermark\nwhere TableName='Sales'",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "ds_watermark_incrematal",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "Fetch Max Modified Date from onprem",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "select max(modifieddate) as maxDate  from onprem.Sales",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "ds_watermark_incrematal",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "Load Incremental Record",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Fetch Watemark Date",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Fetch Max Modified Date from onprem",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": {
+							"value": "@concat('select * from onprem.Sales where ModifiedDate >''',activity('Fetch Watemark Date').output.firstRow.LastUpdate,'''','and ModifiedDate <=''',activity('Fetch Max Modified Date from onprem').output.firstRow.maxDate,'''')",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "truncate table stg.Sales",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_watermark_incrematal",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_Incremental_Sink",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "Update Watermark",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "Load Incremental Record",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "ls_SqlServer",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": {
+								"value": "@concat('update cloud.Watermark\nset LastUpdate=''',activity('Fetch Max Modified Date from onprem').output.firstRow.maxDate,'''','where TableName=''','Sales','''')",
+								"type": "Expression"
+							}
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2024-11-05T14:42:47Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

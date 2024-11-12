@@ -1,0 +1,73 @@
+{
+	"name": "14 if condition activity",
+	"properties": {
+		"activities": [
+			{
+				"name": "If Condition1",
+				"type": "IfCondition",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@lessOrEquals(pipeline().parameters.length,10)",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Set variable2",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "price",
+								"value": {
+									"value": "@mul(mul(pipeline().parameters.length,pipeline().parameters.breadth),70)",
+									"type": "Expression"
+								}
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "Set variable1",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "price",
+								"value": {
+									"value": "@mul(mul(pipeline().parameters.length,pipeline().parameters.breadth),100)",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"length": {
+				"type": "int"
+			},
+			"breadth": {
+				"type": "int"
+			}
+		},
+		"variables": {
+			"price": {
+				"type": "Integer"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-10-29T09:38:10Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

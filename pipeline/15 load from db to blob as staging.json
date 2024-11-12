@@ -1,0 +1,113 @@
+{
+	"name": "15 load from db to blob as staging",
+	"properties": {
+		"activities": [
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('tablelist')",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Copy data1",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "ParquetSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings"
+									},
+									"formatSettings": {
+										"type": "ParquetWriteSettings"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "ds_sqlserver_load_from_db_to_blob_staging",
+									"type": "DatasetReference",
+									"parameters": {
+										"Schema": {
+											"value": "@item().Schema",
+											"type": "Expression"
+										},
+										"Tablename": {
+											"value": "@item().Tablename",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "ds_blob_data_load_from_db_to_blob_staging",
+									"type": "DatasetReference",
+									"parameters": {
+										"Schema": {
+											"value": "@item().Schema",
+											"type": "Expression"
+										},
+										"Filename": {
+											"value": "@item().Tablename",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"variables": {
+			"tablelist": {
+				"type": "Array",
+				"defaultValue": [
+					{
+						"Schema": "SalesLt",
+						"Tablename": "Address"
+					},
+					{
+						"Schema": "SalesLt",
+						"Tablename": "Customer"
+					},
+					{
+						"Schema": "SalesLt",
+						"Tablename": "Product"
+					}
+				]
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-10-29T11:40:46Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

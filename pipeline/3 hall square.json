@@ -1,0 +1,81 @@
+{
+	"name": "3 hall square",
+	"properties": {
+		"activities": [
+			{
+				"name": "Set a",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "a",
+					"value": 3
+				}
+			},
+			{
+				"name": "Set b",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "b",
+					"value": 4
+				}
+			},
+			{
+				"name": "find x",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set a",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set b",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "x",
+					"value": {
+						"value": "@mul(add(variables('a'),variables('b')),add(variables('a'),variables('b')))",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"variables": {
+			"a": {
+				"type": "Integer",
+				"defaultValue": 3
+			},
+			"b": {
+				"type": "Integer",
+				"defaultValue": 4
+			},
+			"x": {
+				"type": "Integer"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-10-27T10:09:37Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,66 @@
+{
+	"name": "5 windows transformation",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_blobemp",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_blop_unpivot",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "window1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          empno as string,",
+				"          ename as string,",
+				"          job as string,",
+				"          mgr as string,",
+				"          hiredate as string,",
+				"          {sal } as integer,",
+				"          comm as string,",
+				"          deptno as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> source1",
+				"source1 window(over(deptno),",
+				"     asc({sal }, true),",
+				"     avg_sal = avg({sal }),",
+				"          {min-sal} = min({sal })) ~> window1",
+				"window1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          empno as string,",
+				"          ename as string,",
+				"          job as string,",
+				"          mgr as string,",
+				"          hiredate as string,",
+				"          sal as string,",
+				"          comm as string,",
+				"          deptno as string",
+				"     ),",
+				"     partitionFileNames:['windowsemp.csv'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> sink1"
+			]
+		}
+	}
+}

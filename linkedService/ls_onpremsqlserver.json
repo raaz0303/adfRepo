@@ -1,0 +1,21 @@
+{
+	"name": "ls_onpremsqlserver",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"server": "DESKTOP-32450KP\\SQLEXPRESS",
+			"database": "edfulnes",
+			"encrypt": "optional",
+			"trustServerCertificate": false,
+			"authenticationType": "Windows",
+			"userName": "DESKTOP-32450KP\\user",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI4YTJmZGY4OC04NGMyLTQ2ZWItOWM4OC0wZWFlYmVlZDk0MjkiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "IRForOnpremSqlDatabase",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

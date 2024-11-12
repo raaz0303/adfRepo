@@ -1,0 +1,33 @@
+{
+	"name": "Ds_forLookupIntoWatermarkTable",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_SqlServer",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [
+			{
+				"name": "id",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "tablename",
+				"type": "varchar"
+			},
+			{
+				"name": "watermarkDateTime",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "Watermarktable"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

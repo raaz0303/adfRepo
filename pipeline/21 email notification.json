@@ -1,0 +1,32 @@
+{
+	"name": "21 email notification",
+	"properties": {
+		"activities": [
+			{
+				"name": "Web1",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"url": "https://prod-23.centralindia.logic.azure.com:443/workflows/07015301eb75405a98b79f0bb335040e/triggers/When_a_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=3lN9hfmf1GBXOwuJoiRk4wuf04IdYVzy1c_sXD89akc",
+					"body": {
+						"To": "publicconnecthub@gmail.com",
+						"Subject": "this test email from adf",
+						"Body": "This is body of test email generating from web activity"
+					}
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2024-11-02T05:04:24Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

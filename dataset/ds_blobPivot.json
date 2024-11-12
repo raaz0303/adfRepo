@@ -1,0 +1,49 @@
+{
+	"name": "ds_blobPivot",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_forblob",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "pivotoutputemp1.csv",
+				"container": "output"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "deptno",
+				"type": "String"
+			},
+			{
+				"name": "ANALYST",
+				"type": "String"
+			},
+			{
+				"name": "CLERK",
+				"type": "String"
+			},
+			{
+				"name": "MANAGER",
+				"type": "String"
+			},
+			{
+				"name": "PRESIDENT",
+				"type": "String"
+			},
+			{
+				"name": "SALESMAN",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

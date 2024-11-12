@@ -1,0 +1,107 @@
+{
+	"name": "1 simple copy file from blob to blob",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_blop_dataflow",
+						"type": "DatasetReference"
+					},
+					"name": "empdata"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_blop_dataflow",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_blob_dataflow_sink",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_blob_dataflow_sink",
+						"type": "DatasetReference"
+					},
+					"name": "sink2"
+				}
+			],
+			"transformations": [
+				{
+					"name": "select1"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "rank1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          empno as string,",
+				"          ename as string,",
+				"          job as string,",
+				"          mgr as string,",
+				"          hiredate as string,",
+				"          {sal } as string,",
+				"          comm as string,",
+				"          deptno as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> empdata",
+				"source(output(",
+				"          empno as string,",
+				"          ename as string,",
+				"          job as string,",
+				"          mgr as string,",
+				"          hiredate as string,",
+				"          {sal } as integer,",
+				"          comm as string,",
+				"          deptno as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> source1",
+				"empdata select(mapColumn(",
+				"          empno,",
+				"          ename,",
+				"          job,",
+				"          managerid = mgr,",
+				"          deptno,",
+				"          hiredate,",
+				"          {sal }",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"source1 derive(col1 = 1,",
+				"          ename = lower(ename)) ~> derivedColumn2",
+				"derivedColumn2 rank(asc({sal }, true),",
+				"     output(salrank as long),",
+				"     dense: true) ~> rank1",
+				"select1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     partitionFileNames:['df.sink.csv'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> sink1",
+				"rank1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     partitionFileNames:['rankwiseemp.csv'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> sink2"
+			]
+		}
+	}
+}

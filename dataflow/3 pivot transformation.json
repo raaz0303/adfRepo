@@ -1,0 +1,68 @@
+{
+	"name": "3 pivot transformation",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_sqlemp",
+						"type": "DatasetReference"
+					},
+					"name": "empdata"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_blop_dataflow",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "pivot1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          empno as integer,",
+				"          ename as string,",
+				"          job as string,",
+				"          mgr as integer,",
+				"          hiredate as date,",
+				"          sal as integer,",
+				"          comm as integer,",
+				"          deptno as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> empdata",
+				"empdata pivot(groupBy(deptno),",
+				"     pivotBy(job),",
+				"     {} = count(empno),",
+				"     columnNaming: '$N$V',",
+				"     lateral: true) ~> pivot1",
+				"pivot1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          empno as string,",
+				"          ename as string,",
+				"          job as string,",
+				"          mgr as string,",
+				"          hiredate as string,",
+				"          {sal } as string,",
+				"          comm as string,",
+				"          deptno as string",
+				"     ),",
+				"     partitionFileNames:['pivotoutputemp1.csv'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> sink1"
+			]
+		}
+	}
+}

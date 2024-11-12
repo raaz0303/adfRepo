@@ -1,0 +1,6 @@
+{
+	"name": "IRForOnpremSqlDatabase",
+	"properties": {
+		"type": "SelfHosted"
+	}
+}

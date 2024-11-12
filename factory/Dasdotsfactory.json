@@ -1,0 +1,9 @@
+{
+	"name": "Dasdotsfactory",
+	"location": "centralindia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "00528550-7313-47c1-b587-6801c8335d68",
+		"tenantId": "97c34a30-f315-4652-9127-d25bfcec78fb"
+	}
+}

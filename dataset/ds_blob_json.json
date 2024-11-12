@@ -1,0 +1,36 @@
+{
+	"name": "ds_blob_json",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_forblob",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "input.json",
+				"container": "output"
+			}
+		},
+		"schema": {
+			"type": "object",
+			"properties": {
+				"Sno": {
+					"type": "integer"
+				},
+				"Name": {
+					"type": "string"
+				},
+				"Course": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
