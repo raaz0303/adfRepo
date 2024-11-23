@@ -1,0 +1,9 @@
+{
+	"name": "pracdftice",
+	"location": "centralindia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "4c535227-30c3-42a7-a581-c695433a53e6",
+		"tenantId": "97c34a30-f315-4652-9127-d25bfcec78fb"
+	}
+}
