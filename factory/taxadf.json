@@ -1,0 +1,9 @@
+{
+	"name": "taxadf",
+	"location": "centralindia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "6a24cdf7-dc7a-4cb5-971d-85060e786332",
+		"tenantId": "b385dc5d-71a4-4054-b6e0-3b97212a3256"
+	}
+}
